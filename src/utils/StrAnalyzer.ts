@@ -104,3 +104,19 @@ export function saveContextFile(ctx: any, rootDir: string) {
     "utf-8"
   );
 }
+
+export function loadContext(): any {
+  const contextPath = path.resolve(process.cwd(), '.dbagent/context.json');
+
+  if (!fs.existsSync(contextPath)) {
+    throw new Error("❌ Context file not found. Please run `npx dbagent context` first.");
+  }
+
+  const raw = fs.readFileSync(contextPath, 'utf-8');
+  try {
+    const context = JSON.parse(raw);
+    return context;
+  } catch (e) {
+    throw new Error("❌ Failed to parse .dbagent/context.json");
+  }
+}

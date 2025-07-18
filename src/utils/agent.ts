@@ -1,25 +1,141 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { ProjectPaths, ShallowScanResult } from "./StrAnalyzer";
 import dotenv from "dotenv";
+import { mergeType } from "../agentPipeline";
 dotenv.config()
 
-
-
-export function codeGen() {
-
+interface CodeGenItem {
+  type: string;
+  directory: string;
+  fileName: string;
+  content: string;
+  command: string;
+  description: string;
 }
 
-export function codeCombiner() {
+export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
 
+       const ai = new GoogleGenAI({
+            apiKey : process.env.API_KEY!
+        });
+
+ const prompt = `You are a professional typescript prisma and nextjs developer, experienced in writing advanced db schema models and apis using prisma, and then integrating and creating components with the same.
+ you will be give a simple query and context of the whole project that what the project is about. You are to carefully analyze that query think and write code for the same.
+ Give more focus on creating schemas in prisma file and then writing the api end point in nextjs. 
+ Also you will be giving what commands to run. 
+ You will also be given the existing context of the project which will have the routes and descriptions. If the code can be and is to be written in the same route given in context, then give the same route and file name, ELSE GIVE A NEW ROUTE DIRECTORY AND FILENAME.
+
+ Here is the given query by user : ${query}
+
+ Here is the project context : ${projectContext}
+
+ keep the type in json schema either "file" or "command" to describe whether the content is file code or an command to execute.
+ strictly stick to the  json schema. 
+ `
+
+ const response = await ai.models.generateContent({
+  model: "gemini-2.5-pro",
+  contents: prompt,
+
+  config: {
+  thinkingConfig: {
+       thinkingBudget: 20000  
+      },
+  responseMimeType: "application/json",
+  responseSchema: {
+    type: Type.ARRAY,
+    items: {
+      type: Type.OBJECT,
+      properties: {
+        type: {
+          type: Type.STRING, 
+        },
+        directory: {
+          type: Type.STRING,
+        },
+        fileName: {
+          type: Type.STRING,
+        },
+        content: {
+          type: Type.STRING,
+        },
+        command: {
+          type: Type.STRING,
+        },
+        description: {
+          type: Type.STRING, 
+        },
+      },
+      propertyOrdering: [
+        "type",
+        "directory",
+        "fileName",
+        "content",
+        "command",
+        "description"
+      ],
+    },
+  },
+}
+});
+
+
+  console.log("RAW TEXT: ", response.text);
+    
+    const parsedResult: CodeGenItem[] = JSON.parse(response.text!);
+    console.log("PARSED ARRAY: ", parsedResult);
+
+    return parsedResult;
+}
+
+
+export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
+    const ai = new GoogleGenAI({
+            apiKey : process.env.API_KEY!
+        });
+    const prompt = `You are a proffesional typescript, nextjs and prisma developer. you will be given two pieces of code. You need to combine the two code blocks
+    such that the updated code is in working condition. Return only the code according to the schema given to you. make no mistakes and strictly stick to the schema.
+    
+    Here is the existing code : ${existingCode}
+    Here is the new code : ${newCode} 
+
+    strictly follow what I said , don't break anything. 
+    `
+
+    const response = await ai.models.generateContent({
+    model: "gemini-2.5-pro",
+    contents: prompt,
+    config: {
+      thinkingConfig: {
+       thinkingBudget: 20000  
+      },
+      responseMimeType : "application/json",
+      responseSchema :  {
+  type: Type.OBJECT,
+  properties: {
+    code: {
+      type: Type.STRING,
+    },
+  },
+  required: ["code"],
+  propertyOrdering: ["code"],
+}
+    }
+  });
+
+  console.log("RAW TEXT : ",response.text)
+  console.log("PARSED TEXT : ", JSON.parse(response.text!))
+
+  return JSON.parse(response.text!)
 }
 
 export async function contextGatherer(structure : ProjectPaths, scanResult : ShallowScanResult) {
 
      const files = Object.entries(scanResult)
-    .slice(0, 10) // limit to avoid token overload
+    .slice(0, 10) 
     .map(([filePath, { content }]) => ({
       path: filePath,
-      content: content.slice(0, 2000), // trim large files
+      content: content.slice(0, 2000), 
     }));
 
         const ai = new GoogleGenAI({
