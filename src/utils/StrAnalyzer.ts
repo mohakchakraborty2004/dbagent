@@ -1,0 +1,106 @@
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+
+export interface ProjectPaths {
+  root: string;
+  basePath: string;
+  routerType: "app" | "pages";
+  routerDir: string;
+  componentsDir: string;
+  apiDir: string;
+  prismaDir: string;
+}
+
+export type ShallowScanResult = Record<
+  string,
+  { content: string; size: number }
+>;
+
+export function getProjectStructure(projectRoot: string = process.cwd()): ProjectPaths {
+  console.log("project root : ", projectRoot)
+  const hasSrc = fs.existsSync(path.join(projectRoot, "src"));
+  const basePath = hasSrc ? path.join(projectRoot, "src") : projectRoot;
+ console.log("base path : ", basePath )
+  const appDir = path.join(basePath, "app");
+  const pagesDir = path.join(basePath, "pages");
+  const componentsDir = path.join(basePath, "components");
+
+  const isAppRouter = fs.existsSync(appDir);
+  const isPagesRouter = fs.existsSync(pagesDir);
+
+  if (!isAppRouter && !isPagesRouter) {
+    throw new Error("❌ Could not find either 'pages' or 'app' directory in the project.");
+  }
+
+  const routerDir = isAppRouter ? appDir : pagesDir;
+  const routerType = isAppRouter ? "app" : "pages";
+
+  //Ensuring API directory exists
+  const apiDir = path.join(routerDir, "api");
+  if (!fs.existsSync(apiDir)) {
+    fs.mkdirSync(apiDir, { recursive: true });
+    console.log("📂 Created missing API directory:", apiDir);
+  } else {
+    console.log("api directory exists")
+  }
+
+  //Check Prisma directory
+  const prismaDir = path.join(projectRoot, "prisma");
+  console.log("prisma dir :", prismaDir)
+  if (!fs.existsSync(prismaDir)) {
+    console.log("⚠️ Prisma directory not found. Initializing Prisma...");
+    try {
+      execSync("npx prisma init", { stdio: "inherit", cwd: projectRoot });
+    } catch (error) {
+      console.error("❌ Failed to initialize Prisma:", error);
+    }
+  } else {
+    console.log("prisma dir exists.")
+  }
+
+  return {
+    root: projectRoot,
+    basePath,
+    routerType,
+    routerDir,
+    componentsDir,
+    apiDir,
+    prismaDir,
+  };
+}
+
+
+export function shallowScan(rootDir: string): ShallowScanResult {
+  const result: ShallowScanResult = {};
+
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir)) {
+      const fullPath = path.join(dir, entry);
+      const stat = fs.statSync(fullPath);
+
+      if (stat.isDirectory()) {
+        if (entry === "node_modules" || entry.startsWith(".")) continue;
+        walk(fullPath);
+      } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+        const rel = path.relative(rootDir, fullPath);
+        const content = fs.readFileSync(fullPath, "utf-8");
+        result[rel] = { content, size: content.length };
+      }
+    }
+  };
+
+  walk(rootDir);
+  console.log(result);
+  return result;
+}
+
+export function saveContextFile(ctx: any, rootDir: string) {
+  const targetDir = path.join(rootDir, ".dbagent");
+  fs.mkdirSync(targetDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(targetDir, "context.json"),
+    JSON.stringify(ctx, null, 2),
+    "utf-8"
+  );
+}
