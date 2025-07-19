@@ -18,10 +18,9 @@ export type ShallowScanResult = Record<
 >;
 
 export function getProjectStructure(projectRoot: string = process.cwd()): ProjectPaths {
-  console.log("project root : ", projectRoot)
   const hasSrc = fs.existsSync(path.join(projectRoot, "src"));
   const basePath = hasSrc ? path.join(projectRoot, "src") : projectRoot;
- console.log("base path : ", basePath )
+
   const appDir = path.join(basePath, "app");
   const pagesDir = path.join(basePath, "pages");
   const componentsDir = path.join(basePath, "components");
@@ -70,7 +69,6 @@ export function getProjectStructure(projectRoot: string = process.cwd()): Projec
   };
 }
 
-
 export function shallowScan(rootDir: string): ShallowScanResult {
   const result: ShallowScanResult = {};
 
@@ -91,7 +89,6 @@ export function shallowScan(rootDir: string): ShallowScanResult {
   };
 
   walk(rootDir);
-  console.log(result);
   return result;
 }
 
@@ -109,7 +106,7 @@ export function loadContext(): any {
   const contextPath = path.resolve(process.cwd(), '.dbagent/context.json');
 
   if (!fs.existsSync(contextPath)) {
-    throw new Error("❌ Context file not found. Please run `npx dbagent context` first.");
+    throw new Error("❌ Context file not found. Please run `npx dbagent init` first.");
   }
 
   const raw = fs.readFileSync(contextPath, 'utf-8');

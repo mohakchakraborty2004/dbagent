@@ -5,7 +5,7 @@ import { getProjectStructure, saveContextFile, shallowScan } from "./StrAnalyzer
 export default async function ContextGen(){
     //get file structure info.
     const structure = getProjectStructure();
-    console.log(structure);
+    // console.log(structure);
     console.log("Now scanning.........")
     const scanResult = shallowScan(structure.root);
 
@@ -13,5 +13,5 @@ export default async function ContextGen(){
     const context = await contextGatherer(structure, scanResult);
     saveContextFile(context, structure.root);
 
-    console.log(".dbagent/context.json generated successfully");
+    console.log(".dbagent/context.json generated successfully, do not push the context.json to github");
 }
