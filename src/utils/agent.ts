@@ -4,13 +4,6 @@ import dotenv from "dotenv";
 import { mergeType } from "../agentPipeline";
 dotenv.config()
 
-const API_KEY = process.env.API_KEY!
-
-function main() {
-  console.log(typeof(API_KEY));
-}
-
-main();
 
 interface CodeGenItem {
   type: string;
@@ -22,9 +15,9 @@ interface CodeGenItem {
 }
 
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
-
+  try {
        const ai = new GoogleGenAI({
-            apiKey : API_KEY
+            apiKey : ""
         });
 
  const prompt = `You are a professional typescript prisma and nextjs developer, experienced in writing advanced db schema models and apis using prisma, and then integrating and creating components with the same.
@@ -91,12 +84,15 @@ export async function codeGen(query : string, projectContext : any) : Promise<Co
     const parsedResult: CodeGenItem[] = JSON.parse(response.text!);
     console.log("code generated successfully.")   
     return parsedResult;
+  } catch (error) {
+    console.log("gen error---------", error);
+  }
 }
 
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
     const ai = new GoogleGenAI({
-            apiKey : API_KEY
+            apiKey :""
         });
     const prompt = `You are a proffesional typescript, nextjs and prisma developer. you will be given two pieces of code. You need to combine the two code blocks
     such that the updated code is in working condition. Return only the code according to the schema given to you. make no mistakes and strictly stick to the schema.
@@ -142,7 +138,7 @@ export async function contextGatherer(structure : ProjectPaths, scanResult : Sha
     }));
 
         const ai = new GoogleGenAI({
-            apiKey : API_KEY
+            apiKey : ""
         });
 
     const prompt = `You are a proffesional nextjs developer and analyzer, given the project structure and route directories you can determine what the project is about and how it is made.
