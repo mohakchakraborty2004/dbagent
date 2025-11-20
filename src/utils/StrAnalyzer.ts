@@ -51,6 +51,16 @@ export function getProjectStructure(projectRoot: string = process.cwd()): Projec
     console.log("⚠️ Prisma directory not found. Initializing Prisma...");
     try {
       execSync("npx prisma init", { stdio: "inherit", cwd: projectRoot });
+      execSync("npm install --save-dev prisma dotenv", { stdio: "inherit", cwd: projectRoot });
+      execSync(
+  `if [ -f .gitignore ]; then \
+      (grep -qxF ".env*" .gitignore || echo ".env*" >> .gitignore); \
+   else \
+      echo ".env*" > .gitignore; \
+   fi`,
+  { stdio: "inherit", cwd: projectRoot }
+);
+      console.log("✅ Paste your database connection string in the .env file created in the project root.");
     } catch (error) {
       console.error("❌ Failed to initialize Prisma:", error);
     }

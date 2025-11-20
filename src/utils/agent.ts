@@ -17,15 +17,65 @@ interface CodeGenItem {
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
   try {
        const ai = new GoogleGenAI({
-            apiKey : ""
+            apiKey : "api-key-here"
         });
 
  const prompt = `You are a professional typescript prisma and nextjs developer, experienced in writing advanced db schema models and apis using prisma, and then integrating and creating components with the same.
  you will be give a simple query and context of the whole project that what the project is about. You are to carefully analyze that query think and write code for the same.
  Give more focus on creating schemas in prisma file and then writing the api end point in nextjs. After that also write the frontend component for the same implementing the route in the frontend. Use proper server side and client side rendering and there
- should be no hydration error strictly
+ should be no hydration error strictly.
  Also you will be giving what commands to run. 
  You will also be given the existing context of the project which will have the routes and descriptions. If the code can be and is to be written in the same route given in context, then give the same route and file name, ELSE GIVE A NEW ROUTE DIRECTORY AND FILENAME.
+
+  Make sure the code is bug free and working perfectly. Also make sure to not break any existing functionality of the project.
+
+  if using any external library make sure to give the npm install command for the same, for typescript.
+
+PRISMA RULES (IMPORTANT):
+
+1. Do NOT modify or remove anything that Prisma generates by default.
+
+2. Do NOT change the default generator block.
+
+3. Do NOT rename or remove existing models unless explicitly asked.
+
+4. In Prisma 7, the datasource property 'url' is no longer supported in schema files. Do NOT add 'url = env("DATABASE_URL")' inside the schema.
+
+5. Only add or modify models, enums, and relations as required.
+
+6. Always use import { prisma } from "@/lib/prisma" for Prisma instance.
+
+7. Always use import { PrismaClient } from '../generated/prisma/client' for Prisma Client in prisma.ts.
+
+8. Never instantiate a new PrismaClient directly.
+
+9. All queries must be typed, safe, and error-handled.
+
+BACKEND RULES:
+
+1. Use Next.js App Router API routes only.
+
+2. Use correct HTTP verbs and return proper JSON with error handling.
+
+3. Never break existing backend logic.
+
+FRONTEND RULES:
+
+1. Build proper server or client components depending on the requirement.
+
+2. Ensure zero hydration errors.
+
+3. Integrate the API route properly with fetch/actions/useEffect.
+
+4. Maintain clean UI and working UX.
+
+ADDITIONAL RULES:
+
+1. If using an external library, provide the exact 'npm install' ( with their proper types if any ) command.
+
+2. Provide commands for Prisma migrate and Prisma generate.
+
+3. Ensure all provided code is stable, correct, and production-ready."
 
  Here is the given query by user : ${query}
 
@@ -92,7 +142,7 @@ export async function codeGen(query : string, projectContext : any) : Promise<Co
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
     const ai = new GoogleGenAI({
-            apiKey :""
+            apiKey :"api-key-here"
         });
     const prompt = `You are a proffesional typescript, nextjs and prisma developer. you will be given two pieces of code. You need to combine the two code blocks
     such that the updated code is in working condition. Return only the code according to the schema given to you. make no mistakes and strictly stick to the schema.
@@ -138,7 +188,7 @@ export async function contextGatherer(structure : ProjectPaths, scanResult : Sha
     }));
 
         const ai = new GoogleGenAI({
-            apiKey : ""
+            apiKey : "api-key-here"
         });
 
     const prompt = `You are a proffesional nextjs developer and analyzer, given the project structure and route directories you can determine what the project is about and how it is made.
