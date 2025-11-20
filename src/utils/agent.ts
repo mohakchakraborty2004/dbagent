@@ -17,7 +17,7 @@ interface CodeGenItem {
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
   try {
        const ai = new GoogleGenAI({
-            apiKey : "api-key-here"
+            apiKey : process.env.GEMINI_API_KEY || ""
         });
 
  const prompt = `You are a professional typescript prisma and nextjs developer, experienced in writing advanced db schema models and apis using prisma, and then integrating and creating components with the same.
@@ -39,17 +39,19 @@ PRISMA RULES (IMPORTANT):
 
 3. Do NOT rename or remove existing models unless explicitly asked.
 
-4. In Prisma 7, the datasource property 'url' is no longer supported in schema files. Do NOT add 'url = env("DATABASE_URL")' inside the schema.
+4. (VERY IMPORTANT) In prisma.schema , the datasource property 'url' is no longer supported in schema files. Do NOT add 'url = env("DATABASE_URL")' inside the prisma.schema
 
 5. Only add or modify models, enums, and relations as required.
 
-6. Always use import { prisma } from "@/lib/prisma" for Prisma instance.
+6. Always use "import { prisma } from "@/lib/prisma" for Prisma instance.
 
-7. Always use import { PrismaClient } from '../generated/prisma/client' for Prisma Client in prisma.ts.
+7. Never instantiate a new PrismaClient directly.
 
-8. Never instantiate a new PrismaClient directly.
+8. All queries must be typed, safe, and error-handled.
 
-9. All queries must be typed, safe, and error-handled.
+9. Before running or returning "npx prisma generate" , Run or return "npm install @prisma/client" 
+
+10. Always use "import  { PrismaClient } from "@/generated/prisma" instead of "import { PrismaClient } from @prisma/client".
 
 BACKEND RULES:
 
@@ -142,7 +144,7 @@ ADDITIONAL RULES:
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
     const ai = new GoogleGenAI({
-            apiKey :"api-key-here"
+            apiKey :process.env.GEMINI_API_KEY || ""
         });
     const prompt = `You are a proffesional typescript, nextjs and prisma developer. you will be given two pieces of code. You need to combine the two code blocks
     such that the updated code is in working condition. Return only the code according to the schema given to you. make no mistakes and strictly stick to the schema.
@@ -188,7 +190,7 @@ export async function contextGatherer(structure : ProjectPaths, scanResult : Sha
     }));
 
         const ai = new GoogleGenAI({
-            apiKey : "api-key-here"
+            apiKey : process.env.GEMINI_API_KEY || ""
         });
 
     const prompt = `You are a proffesional nextjs developer and analyzer, given the project structure and route directories you can determine what the project is about and how it is made.
