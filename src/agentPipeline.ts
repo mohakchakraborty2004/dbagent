@@ -18,10 +18,16 @@ export interface mergeType {
 async function writeFileSafe(directory: string, fileName: string, content: string) {
   const fullPath = path.join(directory, fileName);
   const cleanedContent = content.replace(/\\n/g, "\n");
+  const isFrontendFile = /\.(?:jsx|tsx)$/.test(fileName);
+
+  if (isFrontendFile) {
+    console.log(`[frontend] Applying generated UI file: ${fullPath}`);
+  }
 
   if (!fs.existsSync(fullPath)) {
     fs.writeFileSync(fullPath, cleanedContent, "utf-8");
     console.log(`✅ Created new file: ${fullPath}`);
+    if (isFrontendFile) console.log(`[frontend] Created UI file: ${fullPath}`);
   } else {
     const existing = fs.readFileSync(fullPath, "utf-8");
     console.log(existing)
@@ -30,6 +36,7 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
     //@ts-ignore
     fs.writeFileSync(fullPath, merged.code.replace(/\\n/g, "\n"), "utf-8");
     console.log(`🔁 Updated file with merged content: ${fullPath}`);
+    if (isFrontendFile) console.log(`[frontend] Updated UI file: ${fullPath}`);
   }
 }
 
