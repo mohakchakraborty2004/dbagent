@@ -23,9 +23,12 @@ program
     console.log("proccesing your query: ",query)
     console.log("[frontend] Preparing project context for code generation...");
     const context = loadContext()
+    console.log("[frontend] Project context loaded successfully.");
     const array = await codeGen(query,context );
     console.log(`[frontend] Generated ${array?.length ?? 0} project action(s).`);
+    console.log("[frontend] Applying generated project changes...");
     await handleAgentOutput(array!)
+    console.log("[frontend] Generated UI changes have been applied.");
     console.log("query processed");
   })
   

@@ -22,6 +22,7 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
 
   if (isFrontendFile) {
     console.log(`[frontend] Applying generated UI file: ${fullPath}`);
+    console.log(`[frontend] UI payload contains ${cleanedContent.split("\n").length} line(s).`);
   }
 
   if (!fs.existsSync(fullPath)) {
@@ -52,6 +53,11 @@ function runCommand(cmd: string) {
 
 
 export async function handleAgentOutput(actions: any[]) {
+  const frontendActions = actions.filter(
+    (item) => item.type === "file" && /\.(?:jsx|tsx)$/.test(item.fileName)
+  );
+  console.log(`[frontend] Processing ${frontendActions.length} UI action(s).`);
+
   for (const item of actions) {
     if (item.type === "file") {
       const fullDir = path.resolve(process.cwd(), item.directory);
@@ -63,4 +69,6 @@ export async function handleAgentOutput(actions: any[]) {
       runCommand(item.command);
     }
   }
+
+  console.log("[frontend] Finished processing UI actions.");
 }

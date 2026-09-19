@@ -82,6 +82,7 @@ export function getProjectStructure(projectRoot: string = process.cwd()): Projec
 export function shallowScan(rootDir: string): ShallowScanResult {
   const result: ShallowScanResult = {};
   let frontendFileCount = 0;
+  console.log(`[frontend] Scanning for UI files in: ${rootDir}`);
 
   const walk = (dir: string) => {
     for (const entry of fs.readdirSync(dir)) {
@@ -95,7 +96,10 @@ export function shallowScan(rootDir: string): ShallowScanResult {
         const rel = path.relative(rootDir, fullPath);
         const content = fs.readFileSync(fullPath, "utf-8");
         result[rel] = { content, size: content.length };
-        if (/\.(?:tsx|jsx)$/.test(entry)) frontendFileCount += 1;
+        if (/\.(?:tsx|jsx)$/.test(entry)) {
+          frontendFileCount += 1;
+          console.log(`[frontend] Discovered UI file: ${rel}`);
+        }
       }
     }
   };
