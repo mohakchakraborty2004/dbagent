@@ -21,8 +21,10 @@ program
   .argument('<query>', 'natural language request')
   .action(async (query) => {
     console.log("proccesing your query: ",query)
+    console.log("[frontend] Preparing project context for code generation...");
     const context = loadContext()
     const array = await codeGen(query,context );
+    console.log(`[frontend] Generated ${array?.length ?? 0} project action(s).`);
     await handleAgentOutput(array!)
     console.log("query processed");
   })
