@@ -20,10 +20,18 @@ program
 program
   .argument('<query>', 'natural language request')
   .action(async (query) => {
+    const startedAt = Date.now();
     console.log("proccesing your query: ",query)
+    console.log(`[frontend] Request received at ${new Date(startedAt).toISOString()}.`);
+    console.log("[frontend] Preparing project context for code generation...");
     const context = loadContext()
+    console.log("[frontend] Project context loaded successfully.");
     const array = await codeGen(query,context );
+    console.log(`[frontend] Generated ${array?.length ?? 0} project action(s).`);
+    console.log("[frontend] Applying generated project changes...");
     await handleAgentOutput(array!)
+    console.log("[frontend] Generated UI changes have been applied.");
+    console.log(`[frontend] Request completed in ${Date.now() - startedAt}ms.`);
     console.log("query processed");
   })
   

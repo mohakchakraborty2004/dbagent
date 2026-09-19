@@ -18,10 +18,17 @@ export interface mergeType {
 async function writeFileSafe(directory: string, fileName: string, content: string) {
   const fullPath = path.join(directory, fileName);
   const cleanedContent = content.replace(/\\n/g, "\n");
+  const isFrontendFile = /\.(?:jsx|tsx)$/.test(fileName);
+
+  if (isFrontendFile) {
+    console.log(`[frontend] Applying generated UI file: ${fullPath}`);
+    console.log(`[frontend] UI payload contains ${cleanedContent.split("\n").length} line(s).`);
+  }
 
   if (!fs.existsSync(fullPath)) {
     fs.writeFileSync(fullPath, cleanedContent, "utf-8");
     console.log(`✅ Created new file: ${fullPath}`);
+    if (isFrontendFile) console.log(`[frontend] Created UI file: ${fullPath}`);
   } else {
     const existing = fs.readFileSync(fullPath, "utf-8");
     console.log(existing)
@@ -30,6 +37,7 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
     //@ts-ignore
     fs.writeFileSync(fullPath, merged.code.replace(/\\n/g, "\n"), "utf-8");
     console.log(`🔁 Updated file with merged content: ${fullPath}`);
+    if (isFrontendFile) console.log(`[frontend] Updated UI file: ${fullPath}`);
   }
 }
 
@@ -45,6 +53,19 @@ function runCommand(cmd: string) {
 
 
 export async function handleAgentOutput(actions: any[]) {
+  const frontendActions = actions.filter(
+    (item) => item.type === "file" && /\.(?:jsx|tsx)$/.test(item.fileName)
+  );
+  const frontendDirectories = new Set(
+    frontendActions.map((item) => path.resolve(process.cwd(), item.directory))
+  );
+  console.log(`[frontend] Processing ${frontendActions.length} UI action(s).`);
+  console.log(`[frontend] UI actions span ${frontendDirectories.size} director${frontendDirectories.size === 1 ? "y" : "ies"}.`);
+
+  if (frontendActions.length === 0) {
+    console.log("[frontend] No generated JSX or TSX files to apply.");
+  }
+
   for (const item of actions) {
     if (item.type === "file") {
       const fullDir = path.resolve(process.cwd(), item.directory);
@@ -56,4 +77,6 @@ export async function handleAgentOutput(actions: any[]) {
       runCommand(item.command);
     }
   }
+
+  console.log("[frontend] Finished processing UI actions.");
 }
