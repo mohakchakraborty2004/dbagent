@@ -56,7 +56,15 @@ export async function handleAgentOutput(actions: any[]) {
   const frontendActions = actions.filter(
     (item) => item.type === "file" && /\.(?:jsx|tsx)$/.test(item.fileName)
   );
+  const frontendDirectories = new Set(
+    frontendActions.map((item) => path.resolve(process.cwd(), item.directory))
+  );
   console.log(`[frontend] Processing ${frontendActions.length} UI action(s).`);
+  console.log(`[frontend] UI actions span ${frontendDirectories.size} director${frontendDirectories.size === 1 ? "y" : "ies"}.`);
+
+  if (frontendActions.length === 0) {
+    console.log("[frontend] No generated JSX or TSX files to apply.");
+  }
 
   for (const item of actions) {
     if (item.type === "file") {
