@@ -20,11 +20,13 @@ program
 program
   .argument('<query>', 'natural language request')
   .action(async (query) => {
-    console.log("proccesing your query: ",query)
+    console.log(`Processing query: ${query}`)
     const context = loadContext()
+    console.log("Loaded project context. Generating actions...")
     const array = await codeGen(query,context );
+    console.log(`Generated ${array?.length ?? 0} action(s). Applying changes...`)
     await handleAgentOutput(array!)
-    console.log("query processed");
+    console.log("Query processed ✅");
   })
   
 program.parse();

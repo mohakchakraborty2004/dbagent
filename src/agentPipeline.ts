@@ -24,7 +24,7 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
     console.log(`✅ Created new file: ${fullPath}`);
   } else {
     const existing = fs.readFileSync(fullPath, "utf-8");
-    console.log(existing)
+    console.log(`🔀 Merging generated changes into: ${fullPath}`);
     //@ts-ignore
     const merged = await codeCombiner(existing, cleanedContent);
     //@ts-ignore
@@ -45,7 +45,13 @@ function runCommand(cmd: string) {
 
 
 export async function handleAgentOutput(actions: any[]) {
-  for (const item of actions) {
+  console.log(`🚀 Applying ${actions.length} generated action(s)`);
+
+  for (const [index, item] of actions.entries()) {
+    console.log(
+      `➡️  Action ${index + 1}/${actions.length}: ${item.description || item.type}`
+    );
+
     if (item.type === "file") {
       const fullDir = path.resolve(process.cwd(), item.directory);
       ensureDir(fullDir);
@@ -56,4 +62,6 @@ export async function handleAgentOutput(actions: any[]) {
       runCommand(item.command);
     }
   }
+
+  console.log("🏁 Finished applying generated actions");
 }
