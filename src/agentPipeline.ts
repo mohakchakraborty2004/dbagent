@@ -45,14 +45,18 @@ function runCommand(cmd: string) {
 
 
 export async function handleAgentOutput(actions: any[]) {
+  console.log(`Processing ${actions.length} agent action(s)...`);
+
   for (const item of actions) {
     if (item.type === "file") {
+      console.log(`Applying file action: ${path.join(item.directory, item.fileName)}`);
       const fullDir = path.resolve(process.cwd(), item.directory);
       ensureDir(fullDir);
       await writeFileSafe(fullDir, item.fileName, item.content);
     }
 
     if (item.type === "command") {
+      console.log(`Applying command action: ${item.command}`);
       runCommand(item.command);
     }
   }
