@@ -23,7 +23,7 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
   if (!fs.existsSync(fullPath)) {
     fs.writeFileSync(fullPath, cleanedContent, "utf-8");
     console.log(`✅ Created new file: ${fullPath}`);
-    logToFile("INFO", "Created file", { path: fullPath });
+    logToFile("INFO", "Created generated file");
   } else {
     const existing = fs.readFileSync(fullPath, "utf-8");
     console.log(existing)
@@ -32,7 +32,7 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
     //@ts-ignore
     fs.writeFileSync(fullPath, merged.code.replace(/\\n/g, "\n"), "utf-8");
     console.log(`🔁 Updated file with merged content: ${fullPath}`);
-    logToFile("INFO", "Updated file", { path: fullPath });
+    logToFile("INFO", "Updated generated file");
   }
 }
 
@@ -41,10 +41,10 @@ function runCommand(cmd: string) {
   try {
     execSync(cmd, { stdio: "inherit" });
     console.log(`💡 Executed: ${cmd}`);
-    logToFile("INFO", "Executed command", { command: cmd });
+    logToFile("INFO", "Executed generated command");
   } catch (err) {
     console.error(`❌ Failed to run command: ${cmd}`, err);
-    logToFile("ERROR", "Command failed", { command: cmd, error: String(err) });
+    logToFile("ERROR", "Generated command failed");
   }
 }
 
