@@ -122,6 +122,7 @@ export function loadContext(): any {
   const raw = fs.readFileSync(contextPath, 'utf-8');
   try {
     const context = JSON.parse(raw);
+    console.log(`📖 Loaded project context from ${contextPath}`);
     return context;
   } catch (e) {
     throw new Error("❌ Failed to parse .dbagent/context.json");
