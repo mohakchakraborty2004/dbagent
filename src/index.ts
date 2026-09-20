@@ -20,7 +20,7 @@ program
       console.log("Context gathering complete ✅");
       logToFile("INFO", "Project initialization completed");
     } catch (error) {
-      logToFile("ERROR", "Project initialization failed", error);
+      logToFile("ERROR", "Project initialization failed");
       throw error;
     }
   });
@@ -28,7 +28,7 @@ program
 program
   .argument('<query>', 'natural language request')
   .action(async (query) => {
-    logToFile("INFO", "Query processing started", { query });
+    logToFile("INFO", "Query processing started");
     console.log("proccesing your query: ",query)
     try {
       const context = loadContext()
@@ -37,7 +37,7 @@ program
       console.log("query processed");
       logToFile("INFO", "Query processing completed");
     } catch (error) {
-      logToFile("ERROR", "Query processing failed", error);
+      logToFile("ERROR", "Query processing failed");
       throw error;
     }
   })
