@@ -18,6 +18,9 @@
 2. Run `npx dbagent "YOUR_QUERY_HERE"`  
    → Executes the query to create files, write, and update code accordingly
 
+CLI activity and errors are appended to `.dbagent/dbagent.log` in the project root.
+The `.dbagent` directory is local runtime data and should not be committed.
+
 ---
 
 ## 🧠 About This Project
