@@ -24,10 +24,10 @@ async function writeFileSafe(directory: string, fileName: string, content: strin
     console.log(`✅ Created new file: ${fullPath}`);
   } else {
     const existing = fs.readFileSync(fullPath, "utf-8");
-    console.log(existing)
-    //@ts-ignore
     const merged = await codeCombiner(existing, cleanedContent);
-    //@ts-ignore
+    if (!merged?.code) {
+      throw new Error(`Code generation returned no merged content for ${fullPath}`);
+    }
     fs.writeFileSync(fullPath, merged.code.replace(/\\n/g, "\n"), "utf-8");
     console.log(`🔁 Updated file with merged content: ${fullPath}`);
   }
@@ -45,7 +45,15 @@ function runCommand(cmd: string) {
 
 
 export async function handleAgentOutput(actions: any[]) {
-  for (const item of actions) {
+  const startedAt = Date.now();
+  const fileCount = actions.filter((item) => item.type === "file").length;
+  const commandCount = actions.filter((item) => item.type === "command").length;
+  console.log(
+    `🚀 Applying ${actions.length} action(s): ${fileCount} file(s), ${commandCount} command(s)`,
+  );
+
+  for (const [index, item] of actions.entries()) {
+    console.log(`▶️  Action ${index + 1}/${actions.length}: ${item.type}`);
     if (item.type === "file") {
       const fullDir = path.resolve(process.cwd(), item.directory);
       ensureDir(fullDir);
@@ -55,5 +63,11 @@ export async function handleAgentOutput(actions: any[]) {
     if (item.type === "command") {
       runCommand(item.command);
     }
+
+    if (item.type !== "file" && item.type !== "command") {
+      console.warn(`⚠️ Skipping unsupported action type: ${String(item.type)}`);
+    }
   }
+
+  console.log(`🏁 Applied agent output in ${Date.now() - startedAt}ms`);
 }
