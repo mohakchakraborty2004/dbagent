@@ -6,7 +6,7 @@
     "dbagent": "./dist/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && node --test tests/*.test.js",
     "dev": "ts-node src/index.ts",
     "build": "tsc"
   },

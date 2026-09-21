@@ -18,6 +18,10 @@
 2. Run `npx dbagent "YOUR_QUERY_HERE"`  
    → Executes the query to create files, write, and update code accordingly
 
+CLI activity and errors are appended to the operating system's user state directory
+(`$XDG_STATE_HOME/dbagent/dbagent.log` on Linux, with standard platform fallbacks).
+Queries, generated commands, and generated file paths are not included in the log.
+
 ---
 
 ## 🧠 About This Project
