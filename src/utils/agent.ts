@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { ProjectPaths, ShallowScanResult } from "./StrAnalyzer";
 import dotenv from "dotenv";
 import { mergeType } from "../agentPipeline";
+import { logToFile } from "./logger";
 dotenv.config()
 
 
@@ -16,6 +17,7 @@ interface CodeGenItem {
 
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
   try {
+       logToFile("INFO", "Code generation started");
        const ai = new GoogleGenAI({
             apiKey : process.env.GEMINI_API_KEY || ""
         });
@@ -135,14 +137,17 @@ ADDITIONAL RULES:
  
     const parsedResult: CodeGenItem[] = JSON.parse(response.text!);
     console.log("code generated successfully.")   
+    logToFile("INFO", "Code generation completed");
     return parsedResult;
   } catch (error) {
     console.log("gen error---------", error);
+    logToFile("ERROR", "Code generation failed");
   }
 }
 
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
+    logToFile("INFO", "Existing file merge started");
     const ai = new GoogleGenAI({
             apiKey :process.env.GEMINI_API_KEY || ""
         });
@@ -177,10 +182,13 @@ export async function codeCombiner(existingCode: string, newCode: string) : Prom
   });
 
 
+  logToFile("INFO", "Existing file merge completed");
   return JSON.parse(response.text!)
 }
 
 export async function contextGatherer(structure : ProjectPaths, scanResult : ShallowScanResult) {
+
+        logToFile("INFO", "Context analysis started");
 
      const files = Object.entries(scanResult)
     .slice(0, 10) 
