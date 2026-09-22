@@ -16,6 +16,8 @@ interface CodeGenItem {
 
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
   try {
+       const startedAt = Date.now();
+       console.log("Requesting a change plan from Gemini...");
        const ai = new GoogleGenAI({
             apiKey : process.env.GEMINI_API_KEY || ""
         });
@@ -134,7 +136,7 @@ ADDITIONAL RULES:
 });
  
     const parsedResult: CodeGenItem[] = JSON.parse(response.text!);
-    console.log("code generated successfully.")   
+    console.log(`Generated ${parsedResult.length} action(s) in ${Date.now() - startedAt}ms.`);
     return parsedResult;
   } catch (error) {
     console.log("gen error---------", error);
@@ -143,6 +145,7 @@ ADDITIONAL RULES:
 
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
+    console.log("Requesting Gemini to merge file contents...");
     const ai = new GoogleGenAI({
             apiKey :process.env.GEMINI_API_KEY || ""
         });
