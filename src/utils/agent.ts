@@ -17,7 +17,11 @@ interface CodeGenItem {
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
   try {
        const startedAt = Date.now();
-       console.log("Requesting a change plan from Gemini...");
+       const contextSize = JSON.stringify(projectContext).length;
+       console.log(
+         `Preparing Gemini change plan (query: ${query.length} chars, context: ${contextSize} chars)...`
+       );
+       console.log("Requesting a change plan from Gemini using gemini-2.5-pro...");
        const ai = new GoogleGenAI({
             apiKey : process.env.GEMINI_API_KEY || ""
         });
@@ -135,17 +139,21 @@ ADDITIONAL RULES:
 }
 });
  
+    console.log(`Received Gemini response (${response.text?.length ?? 0} chars); validating actions...`);
     const parsedResult: CodeGenItem[] = JSON.parse(response.text!);
     console.log(`Generated ${parsedResult.length} action(s) in ${Date.now() - startedAt}ms.`);
     return parsedResult;
   } catch (error) {
-    console.log("gen error---------", error);
+    console.error("Failed to generate change plan:", error);
   }
 }
 
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
-    console.log("Requesting Gemini to merge file contents...");
+    const startedAt = Date.now();
+    console.log(
+      `Requesting Gemini to merge file contents (existing: ${existingCode.length} chars, generated: ${newCode.length} chars)...`
+    );
     const ai = new GoogleGenAI({
             apiKey :process.env.GEMINI_API_KEY || ""
         });
@@ -179,11 +187,12 @@ export async function codeCombiner(existingCode: string, newCode: string) : Prom
     }
   });
 
-
+  console.log(`Received merged file in ${Date.now() - startedAt}ms.`);
   return JSON.parse(response.text!)
 }
 
 export async function contextGatherer(structure : ProjectPaths, scanResult : ShallowScanResult) {
+    const startedAt = Date.now();
 
      const files = Object.entries(scanResult)
     .slice(0, 10) 
@@ -191,6 +200,10 @@ export async function contextGatherer(structure : ProjectPaths, scanResult : Sha
       path: filePath,
       content: content.slice(0, 2000), 
     }));
+
+    console.log(
+      `Preparing context summary from ${files.length} of ${Object.keys(scanResult).length} scanned file(s).`
+    );
 
         const ai = new GoogleGenAI({
             apiKey : process.env.GEMINI_API_KEY || ""
@@ -273,5 +286,6 @@ Strictly give the json out put and nothing else. And once again very important s
     }
   })
 
+  console.log(`Generated project context in ${Date.now() - startedAt}ms.`);
   return response.text
 }
