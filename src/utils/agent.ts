@@ -152,7 +152,7 @@ ADDITIONAL RULES:
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
     const startedAt = Date.now();
     console.log(
-      `Requesting Gemini to merge file contents (existing: ${existingCode.length} chars, generated: ${newCode.length} chars)...`
+      `Requesting gemini-2.5-pro to merge file contents (existing: ${existingCode.length} chars, generated: ${newCode.length} chars)...`
     );
     const ai = new GoogleGenAI({
             apiKey :process.env.GEMINI_API_KEY || ""
@@ -187,7 +187,9 @@ export async function codeCombiner(existingCode: string, newCode: string) : Prom
     }
   });
 
-  console.log(`Received merged file in ${Date.now() - startedAt}ms.`);
+  console.log(
+    `Received merged file (${response.text?.length ?? 0} chars) in ${Date.now() - startedAt}ms.`
+  );
   return JSON.parse(response.text!)
 }
 
