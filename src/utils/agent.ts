@@ -16,6 +16,8 @@ interface CodeGenItem {
 
 export async function codeGen(query : string, projectContext : any) : Promise<CodeGenItem[] | undefined>  {
   try {
+       const startedAt = Date.now();
+       console.log("Requesting code generation from Gemini...");
        const ai = new GoogleGenAI({
             apiKey : process.env.GEMINI_API_KEY || ""
         });
@@ -134,7 +136,7 @@ ADDITIONAL RULES:
 });
  
     const parsedResult: CodeGenItem[] = JSON.parse(response.text!);
-    console.log("code generated successfully.")   
+    console.log(`Code generation completed in ${Date.now() - startedAt}ms.`)
     return parsedResult;
   } catch (error) {
     console.log("gen error---------", error);
@@ -143,6 +145,8 @@ ADDITIONAL RULES:
 
 
 export async function codeCombiner(existingCode: string, newCode: string) : Promise<mergeType | undefined> {
+    const startedAt = Date.now();
+    console.log("Merging generated content with an existing file...");
     const ai = new GoogleGenAI({
             apiKey :process.env.GEMINI_API_KEY || ""
         });
@@ -177,10 +181,15 @@ export async function codeCombiner(existingCode: string, newCode: string) : Prom
   });
 
 
-  return JSON.parse(response.text!)
+  const merged = JSON.parse(response.text!)
+  console.log(`Content merge completed in ${Date.now() - startedAt}ms.`);
+  return merged
 }
 
 export async function contextGatherer(structure : ProjectPaths, scanResult : ShallowScanResult) {
+
+     const startedAt = Date.now();
+     console.log(`Requesting context analysis for ${Object.keys(scanResult).length} source file(s)...`);
 
      const files = Object.entries(scanResult)
     .slice(0, 10) 
@@ -270,5 +279,6 @@ Strictly give the json out put and nothing else. And once again very important s
     }
   })
 
+  console.log(`Context analysis completed in ${Date.now() - startedAt}ms.`);
   return response.text
 }

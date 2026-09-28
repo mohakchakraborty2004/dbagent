@@ -1,4 +1,3 @@
-import { error } from "console";
 import { contextGatherer } from "./agent";
 import { getProjectStructure, saveContextFile, shallowScan } from "./StrAnalyzer";
 
@@ -8,6 +7,7 @@ export default async function ContextGen(){
     // console.log(structure);
     console.log("Now scanning.........")
     const scanResult = shallowScan(structure.root);
+    console.log(`Scanned ${Object.keys(scanResult).length} source file(s).`)
 
     console.log("Generating the context file.....")
     const context = await contextGatherer(structure, scanResult);
